@@ -1,10 +1,13 @@
 ﻿using System.Text;
 using Application.Abstractions.Authentication;
+using Application.Abstractions.Authorization;
 using Application.Abstractions.Data;
+using Application.Abstractions.Repositories;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.Database;
 using Infrastructure.DomainEvents;
+using Infrastructure.Repositories;
 using Infrastructure.Time;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +30,7 @@ public static class DependencyInjection
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
             .AddAuthenticationInternal(configuration)
+            .AddRepositories()
             .AddAuthorizationInternal();
 
     private static IServiceCollection AddServices(this IServiceCollection services)
@@ -87,10 +91,20 @@ public static class DependencyInjection
         return services;
     }
 
+    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPermissionRepository, PermissionRepository>();
+
+        return services;
+    }
+
     private static IServiceCollection AddAuthorizationInternal(this IServiceCollection services)
     {
         services.AddAuthorization();
 
+        services.AddScoped<Application.Abstractions.Authorization.IAuthorizationService, AuthorizationService>();
         services.AddScoped<PermissionProvider>();
 
         services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
