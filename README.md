@@ -154,22 +154,3 @@ dotnet ef migrations add InitialCreate --project src/Infrastructure --startup-pr
 # Apply migrations
 dotnet ef database update --project src/Infrastructure --startup-project src/Web.Api
 ```
-
-## Learn More
-
-For a comprehensive course on Clean Architecture, check out [**Pragmatic Clean Architecture**](https://www.milanjovanovic.tech/pragmatic-clean-architecture?utm_source=ca-template):
-
-- Domain-Driven Design
-- Role-based authorization
-- Permission-based authorization
-- Distributed caching with Redis
-- OpenTelemetry
-- Outbox pattern
-- API Versioning
-- Unit testing
-- Functional testing
-- Integration testing
-
----
-
-Stay awesome!
