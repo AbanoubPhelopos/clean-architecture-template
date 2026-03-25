@@ -1,5 +1,6 @@
 using Application.Abstractions.Messaging;
 using Application.Abstractions.Repositories;
+using Application.Authorization.Responses;
 using Domain.Authorization;
 using SharedKernel;
 
@@ -22,7 +23,7 @@ internal sealed class UpdateRoleCommandHandler(
         role.Description = request.Description;
         
         role.RolePermissions.Clear();
-
+        
         IReadOnlyList<Permission> permissions = await permissionRepository.GetByNamesAsync(request.Permissions, cancellationToken);
         foreach (Permission permission in permissions)
         {

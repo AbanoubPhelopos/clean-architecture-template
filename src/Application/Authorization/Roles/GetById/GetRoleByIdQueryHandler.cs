@@ -1,5 +1,6 @@
 using Application.Abstractions.Messaging;
 using Application.Abstractions.Repositories;
+using Application.Authorization.Responses;
 using Domain.Authorization;
 using SharedKernel;
 
@@ -17,10 +18,12 @@ internal sealed class GetRoleByIdQueryHandler(IRoleRepository roleRepository)
             return Result.Failure<RoleResponse>(AuthorizationErrors.RoleNotFound(request.RoleId));
         }
 
-        return new RoleResponse(
+        var response = new RoleResponse(
             role.Id,
             role.Name,
             role.Description,
             role.RolePermissions.Select(rp => rp.Permission.Name));
+
+        return Result<RoleResponse>.Success(response);
     }
 }

@@ -1,5 +1,6 @@
 using Application.Abstractions.Messaging;
 using Application.Abstractions.Repositories;
+using Application.Authorization.Responses;
 using Domain.Authorization;
 using SharedKernel;
 
