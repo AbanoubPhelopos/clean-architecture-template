@@ -3,8 +3,10 @@ using Application.Abstractions.Authentication;
 using Application.Abstractions.Authorization;
 using Application.Abstractions.Data;
 using Application.Abstractions.Repositories;
+using Application.Configuration;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
+using Infrastructure.Data;
 using Infrastructure.Database;
 using Infrastructure.DomainEvents;
 using Infrastructure.Repositories;
@@ -27,17 +29,27 @@ public static class DependencyInjection
         IConfiguration configuration) =>
         services
             .AddServices()
+            .AddConfiguration(configuration)
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
             .AddAuthenticationInternal(configuration)
             .AddRepositories()
-            .AddAuthorizationInternal();
+            .AddAuthorizationInternal()
+            .AddSeeder();
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddConfiguration(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+        services.Configure<DatabaseSettings>(configuration.GetSection(DatabaseSettings.SectionName));
 
         return services;
     }
@@ -70,15 +82,17 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        JwtSettings jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()!;
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(o =>
             {
                 o.RequireHttpsMetadata = false;
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),
-                    ValidIssuer = configuration["Jwt:Issuer"],
-                    ValidAudience = configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
                     ClockSkew = TimeSpan.Zero
                 };
             });
@@ -86,7 +100,7 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
-        services.AddSingleton<ITokenProvider, TokenProvider>();
+        services.AddScoped<ITokenProvider, TokenProvider>();
 
         return services;
     }
@@ -110,6 +124,13 @@ public static class DependencyInjection
         services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
         services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddSeeder(this IServiceCollection services)
+    {
+        services.AddScoped<DevelopmentSeeder>();
 
         return services;
     }
