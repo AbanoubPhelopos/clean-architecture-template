@@ -7,6 +7,7 @@ using Application.Authorization.Roles.Update;
 using Application.Authorization.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using SharedKernel;
 using Web.Api.Infrastructure;
 using Web.Api.Extensions;
@@ -15,6 +16,7 @@ namespace Web.Api.Controllers.Authorization;
 
 [ApiController]
 [Route("roles")]
+[ApiVersion("1.0")]
 public class RolesController : ControllerBase
 {
     [HttpPost]
@@ -34,13 +36,15 @@ public class RolesController : ControllerBase
 
     [HttpGet]
     [Authorize(Policy = "roles:read")]
-    [ProducesResponseType(typeof(List<RoleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<RoleResponse>), StatusCodes.Status200OK)]
     public async Task<IResult> GetAll(
-        IQueryHandler<GetRolesQuery, List<RoleResponse>> handler,
-        CancellationToken cancellationToken)
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        IQueryHandler<GetRolesQuery, PagedResult<RoleResponse>> handler = null!,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetRolesQuery();
-        Result<List<RoleResponse>> result = await handler.Handle(query, cancellationToken);
+        var query = new GetRolesQuery(page, pageSize);
+        Result<PagedResult<RoleResponse>> result = await handler.Handle(query, cancellationToken);
         return result.Match(Results.Ok, CustomResults.Problem);
     }
 

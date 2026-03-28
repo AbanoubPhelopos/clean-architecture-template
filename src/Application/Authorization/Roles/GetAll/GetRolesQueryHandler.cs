@@ -7,19 +7,27 @@ using SharedKernel;
 namespace Application.Authorization.Roles.GetAll;
 
 internal sealed class GetRolesQueryHandler(IRoleRepository roleRepository) 
-    : IQueryHandler<GetRolesQuery, List<RoleResponse>>
+    : IQueryHandler<GetRolesQuery, PagedResult<RoleResponse>>
 {
-    public async Task<Result<List<RoleResponse>>> Handle(GetRolesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<RoleResponse>>> Handle(GetRolesQuery request, CancellationToken cancellationToken)
     {
+        int skip = (request.Page - 1) * request.PageSize;
+        
         IReadOnlyList<Role> roles = await roleRepository.GetAllAsync(cancellationToken);
+        int totalCount = roles.Count;
 
-        var response = roles.Select(r => new RoleResponse(
-            r.Id,
-            r.Name,
-            r.Description,
-            r.RolePermissions.Select(rp => rp.Permission.Name)
-        )).ToList();
+        var pagedRoles = roles
+            .Skip(skip)
+            .Take(request.PageSize)
+            .Select(r => new RoleResponse(
+                r.Id,
+                r.Name,
+                r.Description,
+                r.RolePermissions.Select(rp => rp.Permission.Name)
+            )).ToList();
 
-        return Result<List<RoleResponse>>.Success(response);
+        var result = new PagedResult<RoleResponse>(pagedRoles, totalCount, request.Page, request.PageSize);
+
+        return Result<PagedResult<RoleResponse>>.Success(result);
     }
 }

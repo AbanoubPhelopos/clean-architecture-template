@@ -1,4 +1,6 @@
-﻿using Web.Api.Infrastructure;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Web.Api.Infrastructure;
 
 namespace Web.Api;
 
@@ -9,8 +11,13 @@ public static class DependencyInjection
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
-        // REMARK: If you want to use Controllers, you'll need this.
         services.AddControllers();
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1, 0);
+            options.ReportApiVersions = true;
+            options.AssumeDefaultVersionWhenUnspecified = true;
+        });
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
