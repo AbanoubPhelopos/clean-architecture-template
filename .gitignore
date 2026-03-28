@@ -398,3 +398,6 @@ FodyWeavers.xsd
 *.sln.iml
 
 .containers/
+
+# AI Agent session state and specs
+.ai/
