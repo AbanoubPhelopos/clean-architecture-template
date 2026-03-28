@@ -7,6 +7,7 @@ using Application.Users.Register;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.RateLimiting;
 using SharedKernel;
 using Web.Api.Extensions;
 using Web.Api.Infrastructure;
@@ -16,6 +17,7 @@ namespace Web.Api.Controllers;
 [ApiController]
 [Route("users")]
 [ApiVersion("1.0")]
+[EnableRateLimiting("fixed")]
 public class UsersController : ControllerBase
 {
     [HttpPost("register")]

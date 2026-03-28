@@ -8,6 +8,7 @@ using Application.Authorization.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.RateLimiting;
 using SharedKernel;
 using Web.Api.Infrastructure;
 using Web.Api.Extensions;
@@ -17,6 +18,7 @@ namespace Web.Api.Controllers.Authorization;
 [ApiController]
 [Route("roles")]
 [ApiVersion("1.0")]
+[EnableRateLimiting("fixed")]
 public class RolesController : ControllerBase
 {
     [HttpPost]

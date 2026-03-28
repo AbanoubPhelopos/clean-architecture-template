@@ -37,6 +37,10 @@ app.MapHealthChecks("health", new HealthCheckOptions
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
 
+app.UseCors();
+
+app.UseRateLimiter();
+
 app.UseRequestContextLogging();
 
 app.UseSerilogRequestLogging();
